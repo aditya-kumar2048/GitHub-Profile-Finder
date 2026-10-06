@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Profile Finder</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 p-4">
+
+    <!-- Top Navigation with Theme Toggle -->
+    <header class="w-full max-w-xl mx-auto flex justify-end pt-2">
+        <button onclick="toggleDarkMode()" aria-label="Toggle Dark/Light Mode"
+            class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-sm">
+            <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-xl mx-auto my-auto py-4">
+        
+        <!-- Header / Logo Area -->
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-2xl mb-3 shadow-md transition-colors">
+                <i class="fa-brands fa-github"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight">GitHub Profile Finder</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Get comprehensive profile details sent directly to your inbox.</p>
+        </div>
+
+        <!-- Collapsible Instruction Box -->
+        <div class="mb-6 bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-2xl overflow-hidden transition-colors">
+            <button onclick="toggleInstructions()" class="w-full flex items-center justify-between p-4 text-xs font-semibold text-blue-900 dark:text-blue-200 focus:outline-none">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-info text-blue-500"></i>
+                    <span>How it works & Expected Output</span>
+                </div>
+                <i id="instructionChevron" class="fa-solid fa-chevron-down transition-transform duration-200"></i>
+            </button>
+            <div id="instructionContent" class="hidden px-4 pb-4 text-xs text-blue-800 dark:text-blue-300 border-t border-blue-200/60 dark:border-blue-900/40 pt-3">
+                <ul class="space-y-1.5 list-disc list-inside">
+                    <li><strong>Input:</strong> Enter any public GitHub username and your destination email address.</li>
+                    <li><strong>Processing:</strong> Data is posted securely via webhook in the background.</li>
+                    <li><strong>Output:</strong> You will receive a compiled summary report containing profile metrics, repositories, bio, and stats straight to your email.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Card Form -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-100 dark:shadow-none border border-slate-200/80 dark:border-slate-800 p-8 transition-colors">
+            
+            <form id="profileForm" onsubmit="findProfile(event)" class="space-y-5">
+                
+                <!-- GitHub Username Input -->
+                <div>
+                    <label for="githubUsername" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
+                        GitHub Username
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm">@</span>
+                        <input type="text" id="githubUsername" required autocomplete="off"
+                            class="w-full pl-8 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:bg-white dark:focus:bg-slate-800 transition-all"
+                            placeholder="e.g. torvalds">
+                    </div>
+                </div>
+
+                <!-- Email Address Input -->
+                <div>
+                    <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
+                        Email Address
+                    </label>
+                    <input type="email" id="email" required
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:bg-white dark:focus:bg-slate-800 transition-all"
+                        placeholder="you@example.com">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn"
+                    class="w-full mt-2 py-3 px-4 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-medium text-sm rounded-xl shadow-md transition-all duration-200 flex items-center justify-center space-x-2">
+                    <span id="btnText">Find Profile </span>
+                    <svg id="btnSpinner" class="animate-spin h-4 w-4 text-current hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </form>
+
+        </div>
+
+        <!-- Footer -->
+        <p class="text-center text-xs text-slate-400 mt-6">
+            Securely powered by GitHub & Webhook Automation
+        </p>
+
+    </div>
+
+    <!-- Popup / Floating Notification Message Box -->
+    <div id="popupToast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 max-w-sm w-full mx-4 sm:mx-0">
+        <div id="popupContent" class="flex items-center space-x-3 rounded-2xl p-4 shadow-2xl border bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-100">
+            <div class="flex-shrink-0 text-lg">
+                <i id="popupIcon" class="fa-solid fa-circle-check text-emerald-500"></i>
+            </div>
+            <div class="flex-1 text-sm font-medium" id="popupMessage">
+                Success! Check your inbox.
+            </div>
+            <button onclick="hidePopup()" class="text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-300 p-1">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <div></div> <!-- Spacer for flex layout -->
+
+    <script>
+        // Theme Toggle Functionality
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById("themeIcon");
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                themeIcon.className = "fa-solid fa-moon text-sm";
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                themeIcon.className = "fa-solid fa-sun text-sm";
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Initialize theme based on user preference or system default
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.getElementById("themeIcon").className = "fa-solid fa-sun text-sm";
+        }
+
+        // Toggle Instructions Dropdown
+        function toggleInstructions() {
+            const content = document.getElementById("instructionContent");
+            const chevron = document.getElementById("instructionChevron");
+            content.classList.toggle("hidden");
+            chevron.classList.toggle("rotate-180");
+        }
+
+        // Popup Toast Trigger
+        function showPopup(message, isError = false) {
+            const toast = document.getElementById("popupToast");
+            const content = document.getElementById("popupContent");
+            const msgEl = document.getElementById("popupMessage");
+            const iconEl = document.getElementById("popupIcon");
+
+            msgEl.textContent = message;
+
+            if (isError) {
+                content.className = "flex items-center space-x-3 rounded-2xl p-4 shadow-2xl border bg-rose-50 dark:bg-rose-950 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-100";
+                iconEl.className = "fa-solid fa-circle-exclamation text-rose-500";
+            } else {
+                content.className = "flex items-center space-x-3 rounded-2xl p-4 shadow-2xl border bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-100";
+                iconEl.className = "fa-solid fa-circle-check text-emerald-500";
+            }
+
+            toast.classList.remove("translate-y-24", "opacity-0");
+            toast.classList.add("translate-y-0", "opacity-100");
+
+            // Auto hide after 5 seconds
+            setTimeout(hidePopup, 5000);
+        }
+
+        function hidePopup() {
+            const toast = document.getElementById("popupToast");
+            toast.classList.remove("translate-y-0", "opacity-100");
+            toast.classList.add("translate-y-24", "opacity-0");
+        }
+
+        async function findProfile(event) {
+            event.preventDefault();
+
+            const username = document.getElementById("githubUsername").value.trim();
+            const email = document.getElementById("email").value.trim();
+
+            const submitBtn = document.getElementById("submitBtn");
+            const btnText = document.getElementById("btnText");
+            const btnSpinner = document.getElementById("btnSpinner");
+
+            // UI Loading State
+            submitBtn.disabled = true;
+            btnText.textContent = "Sending...";
+            btnSpinner.classList.remove("hidden");
+
+            try {
+                const data = {
+                    username: username,
+                    email: email
+                };
+
+                const webhookUrl = "https://hook.eu1.make.com/dc9drywucblfoqxdmid4aokhjx4x3r22"
+
+
+                const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+});
+
+if (!response.ok) {
+    throw new Error(`Webhook request failed: ${response.status}`);
+}
+                // Show success popup message
+                showPopup("Success! Check your inbox.", false);
+
+                // Reset form fields
+                document.getElementById("profileForm").reset();
+
+            } catch (error) {
+                console.error("Error submitting details:", error);
+                showPopup("Something went wrong. Please try again.", true);
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.textContent = "Find Profile";
+                btnSpinner.classList.add("hidden");
+            }
+        }
+    </script>
+</body>
+</html>
